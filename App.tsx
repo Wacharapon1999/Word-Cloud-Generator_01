@@ -267,62 +267,57 @@ const LiveDisplayPage: React.FC = () => {
   }, [entries]);
 
   return (
-    <div className="flex flex-col h-screen bg-slate-50 overflow-hidden font-figtree">
+    <div className="flex flex-col h-screen bg-white overflow-hidden font-figtree">
       {/* Navbar Spacer */}
       <div className="h-[64px] flex-shrink-0"></div>
 
-      {/* Dashboard Header */}
-      <div className="bg-white px-6 py-3 flex justify-between items-center border-b border-gray-200 shadow-sm z-10 flex-shrink-0 relative">
+      {/* Dashboard Header - Minimal Height */}
+      <div className="bg-white px-6 py-2 flex justify-between items-center border-b border-gray-100 z-10 flex-shrink-0 relative">
         <div className="flex items-center space-x-6">
-            <div className="flex items-center px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100">
-                <span className="relative flex h-2.5 w-2.5 mr-2">
+            <div className="flex items-center px-2.5 py-1 bg-gray-50 rounded-lg border border-gray-100">
+                <span className="relative flex h-2 w-2 mr-2">
                   <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${isBackendConfigured ? 'bg-[#007947]' : 'bg-yellow-400'} opacity-75`}></span>
-                  <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isBackendConfigured ? 'bg-[#007947]' : 'bg-yellow-500'}`}></span>
+                  <span className={`relative inline-flex rounded-full h-2 w-2 ${isBackendConfigured ? 'bg-[#007947]' : 'bg-yellow-500'}`}></span>
                 </span>
-                <span className={`font-bold text-xs tracking-wider ${isBackendConfigured ? 'text-[#007947]' : 'text-yellow-600'}`}>
-                    {isBackendConfigured ? 'SYSTEM ONLINE' : 'DEMO MODE'}
+                <span className={`font-bold text-[10px] tracking-wider ${isBackendConfigured ? 'text-[#007947]' : 'text-yellow-600'}`}>
+                    {isBackendConfigured ? 'ONLINE' : 'DEMO'}
                 </span>
             </div>
-            <div className="hidden md:block h-6 w-px bg-gray-200"></div>
-            <div className="flex flex-col">
-              <span className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Total</span>
-              <span className="text-[#F40000] text-xl font-black font-kanit leading-none">{entryCount.toLocaleString()}</span>
+            <div className="hidden md:block h-5 w-px bg-gray-100"></div>
+            <div className="flex items-baseline">
+              <span className="text-[10px] text-gray-400 uppercase tracking-widest font-bold mr-2">Total</span>
+              <span className="text-[#F40000] text-lg font-black font-kanit leading-none">{entryCount.toLocaleString()}</span>
             </div>
         </div>
         <div className="text-right hidden sm:block">
-            <div className="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-0.5">Update</div>
-            <div className="font-mono text-xs font-medium text-gray-600 bg-gray-100 px-2 py-0.5 rounded">
-              {lastUpdate.toLocaleTimeString('th-TH')}
+            <div className="font-mono text-[10px] font-medium text-gray-400 bg-gray-50 px-2 py-0.5 rounded">
+              Last Update: {lastUpdate.toLocaleTimeString('th-TH')}
             </div>
         </div>
       </div>
 
-      {/* Main Canvas Area - Expanded to max */}
-      <div className="flex-1 relative flex items-center justify-center p-2 overflow-hidden bg-slate-50">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-[0.03]" 
-             style={{backgroundImage: 'radial-gradient(#007947 1px, transparent 1px)', backgroundSize: '20px 20px'}}>
+      {/* Main Canvas Area - Full Bleed */}
+      <div className="flex-1 relative flex items-center justify-center overflow-hidden bg-white">
+        {/* Background Pattern - Subtle Grid */}
+        <div className="absolute inset-0 opacity-[0.02]" 
+             style={{backgroundImage: 'radial-gradient(#007947 1px, transparent 1px)', backgroundSize: '30px 30px'}}>
         </div>
 
         {loading && !imageUrl ? (
-           <div className="flex flex-col items-center justify-center z-10 bg-white/80 p-12 rounded-[2rem] backdrop-blur-md shadow-xl border border-gray-100">
-             <div className="relative w-24 h-24 mb-8">
-               <div className="absolute inset-0 border-8 border-gray-100 rounded-full"></div>
+           <div className="flex flex-col items-center justify-center z-10 bg-white/90 p-12 rounded-[2rem] backdrop-blur-sm">
+             <div className="relative w-20 h-20 mb-6">
+               <div className="absolute inset-0 border-8 border-gray-50 rounded-full"></div>
                <div className="absolute inset-0 border-8 border-[#007947] rounded-full border-t-transparent animate-spin"></div>
              </div>
-             <p className="text-[#007947] font-kanit text-2xl animate-pulse font-bold">กำลังประมวลผลความคิดเห็น...</p>
+             <p className="text-[#007947] font-kanit text-xl animate-pulse font-bold">กำลังประมวลผล...</p>
            </div>
         ) : !imageUrl ? (
-            <div className="text-center text-gray-300 z-10">
-                <svg className="w-32 h-32 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                <p className="text-4xl font-kanit font-light">รอรับข้อความแรก</p>
-                <p className="text-lg mt-2 font-light">Waiting for incoming messages...</p>
+            <div className="text-center text-gray-200 z-10">
+                <svg className="w-40 h-40 mx-auto mb-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                <p className="text-4xl font-kanit font-bold opacity-50">รอรับข้อความแรก</p>
             </div>
         ) : (
-            <div className="relative w-[98%] h-[96%] flex items-center justify-center p-2 animate-fade-in">
-              {/* Simplified Frame to maximize space */}
-              <div className="absolute inset-0 bg-white rounded-[1rem] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)]"></div>
-              
+            <div className="relative w-full h-full flex items-center justify-center animate-fade-in">
               <img 
                   src={imageUrl} 
                   alt="Live Word Cloud" 
@@ -332,9 +327,9 @@ const LiveDisplayPage: React.FC = () => {
         )}
       </div>
       
-      {/* Minimized Footer */}
-      <div className="bg-white border-t border-gray-200 py-1 px-4 text-[10px] text-gray-300 flex justify-between items-center">
-          <span>CG&Risk Day Word Cloud</span>
+      {/* Minimized Footer - Ultra thin */}
+      <div className="bg-white border-t border-gray-100 py-0.5 px-4 text-[9px] text-gray-300 flex justify-end items-center">
+          <span>CG&Risk Day</span>
       </div>
     </div>
   );
