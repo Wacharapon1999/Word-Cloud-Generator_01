@@ -7,37 +7,57 @@ import { WordCloudEntry } from './types';
 
 const Navbar: React.FC = () => {
   const [hash, setHash] = useState(window.location.hash);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     const handleHashChange = () => setHash(window.location.hash);
+    const handleScroll = () => setScrolled(window.scrollY > 10);
+    
     window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    window.addEventListener('scroll', handleScroll);
+    
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   const isLive = hash === '#/live';
 
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center">
-            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-teal-600">
-              ☁️ WordCloud<span className="font-light text-gray-800">Sheets</span>
+    <nav 
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b ${
+        scrolled || isLive
+          ? 'bg-white/90 backdrop-blur-md border-gray-200 shadow-sm py-2' 
+          : 'bg-[#007947] border-transparent py-4'
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-12">
+          <div className="flex items-center group cursor-pointer" onClick={() => window.location.hash = '#/'}>
+            <span className="text-2xl mr-2 transform group-hover:scale-110 transition-transform duration-300">☁️</span>
+            <span className={`text-2xl font-black tracking-tight font-kanit transition-colors ${scrolled || isLive ? 'text-[#007947]' : 'text-white'}`}>
+              WordCloud
+              <span className={`ml-1 px-1.5 py-0.5 rounded text-sm align-middle ${scrolled || isLive ? 'bg-[#F40000] text-white' : 'bg-white text-[#F40000]'}`}>TH</span>
             </span>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 bg-gray-100/10 rounded-full p-1 backdrop-blur-sm">
             <a
               href="#/"
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                !isLive ? 'bg-green-100 text-green-700' : 'text-gray-500 hover:text-gray-700'
+              className={`px-6 py-2 rounded-full text-sm font-bold transition-all duration-300 font-kanit ${
+                !isLive 
+                  ? 'bg-[#F40000] text-white shadow-md transform scale-105' 
+                  : scrolled || isLive ? 'text-gray-600 hover:bg-gray-100' : 'text-white/80 hover:bg-white/10'
               }`}
             >
-              Input
+              ส่งข้อความ
             </a>
             <a
               href="#/live"
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                isLive ? 'bg-green-100 text-green-700' : 'text-gray-500 hover:text-gray-700'
+              className={`px-6 py-2 rounded-full text-sm font-bold transition-all duration-300 font-kanit ${
+                isLive 
+                  ? 'bg-[#007947] text-white shadow-md transform scale-105' 
+                  : scrolled || isLive ? 'text-gray-600 hover:bg-gray-100' : 'text-white/80 hover:bg-white/10'
               }`}
             >
               Live Display
@@ -61,7 +81,6 @@ const InputPage: React.FC = () => {
     setStatus('idle');
 
     try {
-      // We hardcode 'Anonymous' or a session ID since the UI no longer asks for it
       const userName = "Anonymous User"; 
       const { error } = await saveEntry(userName, inputText, null);
       
@@ -70,7 +89,6 @@ const InputPage: React.FC = () => {
       setStatus('success');
       setInputText('');
       
-      // Reset success message after 3 seconds
       setTimeout(() => setStatus('idle'), 3000);
 
     } catch (err) {
@@ -82,60 +100,127 @@ const InputPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-12 animate-fade-in">
-      <div className="text-center mb-10">
-        <h2 className="text-3xl font-bold text-gray-900">Share Your Thoughts</h2>
-        <p className="mt-2 text-gray-600">Type anything below. It will be saved to Google Sheets and appear on the Live Cloud.</p>
-        {!isBackendConfigured && (
-          <div className="mt-2 text-xs text-yellow-600 bg-yellow-50 p-1 rounded inline-block">
-            Demo Mode: Google Sheet URL not set. Data is local only.
-          </div>
-        )}
-      </div>
+    <div className="min-h-screen pt-24 pb-12 px-4 flex flex-col items-center justify-center relative overflow-hidden">
+      {/* Decorative Background Elements */}
+      <div className="absolute top-20 left-10 w-64 h-64 bg-[#007947]/10 rounded-full blur-3xl -z-10 animate-pulse-soft"></div>
+      <div className="absolute bottom-10 right-10 w-80 h-80 bg-[#F40000]/5 rounded-full blur-3xl -z-10 animate-pulse-soft" style={{animationDelay: '1s'}}></div>
 
-      <div className="bg-white p-6 rounded-2xl shadow-xl border border-gray-100">
-        <label htmlFor="input-text" className="block text-sm font-medium text-gray-700 mb-2">
-          Your Text
-        </label>
-        <textarea
-          id="input-text"
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          onKeyDown={(e) => {
-             if(e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSubmit();
-             }
-          }}
-          rows={6}
-          className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none resize-none text-lg"
-          placeholder="Type words, lyrics, ideas..."
-        />
-        
-        <div className="mt-4 flex items-center justify-between">
-          <div className="text-sm">
-            {status === 'success' && (
-              <span className="text-green-600 flex items-center font-medium">
-                <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/></svg>
-                Sent to Sheet!
-              </span>
-            )}
-            {status === 'error' && (
-              <span className="text-red-600 font-medium">Error sending text.</span>
-            )}
+      <div className="max-w-2xl w-full animate-fade-in z-10">
+        <div className="text-center mb-8">
+          <h2 className="text-5xl font-black text-[#007947] font-kanit tracking-tight mb-4 drop-shadow-sm">
+            แสดงความคิดเห็น
+          </h2>
+          <p className="text-xl text-gray-600 font-light font-kanit">
+            ทุกคำของคุณมีค่า... ข้อความของคุณจะถูกนำไปสร้างเป็นงานศิลปะ
+          </p>
+          {!isBackendConfigured && (
+            <div className="mt-4 inline-flex items-center px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-medium border border-orange-200">
+              <span className="w-2 h-2 rounded-full bg-orange-500 mr-2"></span>
+              Demo Mode: Local Storage Only
+            </div>
+          )}
+        </div>
+
+        <div className="bg-white/80 backdrop-blur-xl p-1 rounded-[2rem] shadow-[0_20px_50px_-12px_rgba(0,121,71,0.15)] border border-white/50">
+          <div className="bg-white rounded-[1.8rem] p-6 sm:p-10 border border-gray-50">
+            <label htmlFor="input-text" className="block text-lg font-bold text-gray-700 mb-3 font-kanit flex items-center">
+              <span className="bg-[#007947] text-white w-8 h-8 rounded-lg flex items-center justify-center mr-3 text-sm">1</span>
+              ข้อความของคุณ (Your Message)
+            </label>
+            
+            <div className="relative group">
+              <textarea
+                id="input-text"
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                onKeyDown={(e) => {
+                   if(e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSubmit();
+                   }
+                }}
+                rows={4}
+                className="w-full px-6 py-5 rounded-2xl border-2 border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-4 focus:ring-[#007947]/10 focus:border-[#007947] outline-none resize-none text-xl text-gray-700 placeholder-gray-300 transition-all duration-300 font-kanit leading-relaxed"
+                placeholder="พิมพ์สิ่งที่คิดอยู่ที่นี่..."
+              />
+              <div className="absolute bottom-4 right-4 text-xs text-gray-400 font-medium pointer-events-none bg-white/80 px-2 py-1 rounded-md backdrop-blur">
+                {inputText.length} chars
+              </div>
+            </div>
+            
+            <div className="mt-8 flex items-center justify-between">
+              <div className="text-sm min-h-[24px]">
+                {status === 'success' && (
+                  <span className="text-[#007947] flex items-center font-bold animate-fade-in bg-green-50 px-4 py-2 rounded-lg">
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"/></svg>
+                    ส่งข้อมูลเรียบร้อยแล้ว!
+                  </span>
+                )}
+                {status === 'error' && (
+                  <span className="text-[#F40000] flex items-center font-bold animate-fade-in bg-red-50 px-4 py-2 rounded-lg">
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                    เกิดข้อผิดพลาด โปรดลองใหม่
+                  </span>
+                )}
+              </div>
+              
+              <button
+                onClick={handleSubmit}
+                disabled={isSubmitting || !inputText.trim()}
+                className={`group relative px-10 py-4 rounded-xl font-bold text-white text-lg shadow-lg transition-all duration-300 font-kanit overflow-hidden ${
+                  isSubmitting || !inputText.trim()
+                    ? 'bg-gray-300 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-[#007947] to-[#005f37] hover:shadow-[#007947]/40 hover:-translate-y-1 hover:shadow-xl'
+                }`}
+              >
+                <span className="relative z-10 flex items-center">
+                   {isSubmitting ? (
+                     <>
+                       <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                       </svg>
+                       กำลังส่ง...
+                     </>
+                   ) : (
+                     <>
+                       ส่งข้อความ
+                       <svg className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                     </>
+                   )}
+                </span>
+              </button>
+            </div>
           </div>
-          
-          <button
-            onClick={handleSubmit}
-            disabled={isSubmitting || !inputText.trim()}
-            className={`px-8 py-3 rounded-lg font-bold text-white shadow-md transition-all transform ${
-              isSubmitting || !inputText.trim()
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-green-600 hover:bg-green-700 hover:-translate-y-1'
-            }`}
-          >
-            {isSubmitting ? 'Sending...' : 'Send'}
-          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const Marquee: React.FC<{ text: string }> = ({ text }) => {
+  if (!text) return null;
+  
+  // Ensure enough content for smooth loop
+  const displayContent = text.length < 1000 ? Array(20).fill(text).join('  •  ') : text;
+
+  return (
+    <div className="w-full bg-[#1a1a1a] border-t-4 border-[#F40000] shadow-2xl relative z-20">
+      <div className="max-w-full mx-auto py-4 overflow-hidden relative">
+        <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-[#1a1a1a] to-transparent z-10"></div>
+        <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-[#1a1a1a] to-transparent z-10"></div>
+        
+        <div className="marquee-container">
+          <div className="marquee-content">
+            <span className="text-3xl font-kanit font-medium tracking-wide text-white/90 px-4 leading-tight">
+              {displayContent}
+            </span>
+            {/* Duplicate for seamless loop if using CSS transform trick, 
+                but here relying on long content and reset */}
+            <span className="text-3xl font-kanit font-medium tracking-wide text-white/90 px-4 leading-tight">
+              {displayContent}
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -145,6 +230,7 @@ const InputPage: React.FC = () => {
 const LiveDisplayPage: React.FC = () => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [allText, setAllText] = useState<string>('');
+  const [rawEntries, setRawEntries] = useState<WordCloudEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [entryCount, setEntryCount] = useState(0);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
@@ -157,6 +243,7 @@ const LiveDisplayPage: React.FC = () => {
         if (entries.length > 0) {
             const combinedText = entries.map(e => e.input_text).join(' ');
             setAllText(combinedText);
+            setRawEntries(entries);
             setEntryCount(entries.length);
         }
       } catch (e) {
@@ -169,20 +256,16 @@ const LiveDisplayPage: React.FC = () => {
     loadInitialData();
   }, []);
 
-  // Subscribe to real-time updates (polling or local)
+  // Subscribe to real-time updates
   useEffect(() => {
     const unsubscribe = subscribeToNewEntries((newEntry: WordCloudEntry) => {
-      console.log("New entry received:", newEntry);
-      setAllText(prev => {
-        return prev ? prev + ' ' + newEntry.input_text : newEntry.input_text;
-      });
+      setAllText(prev => prev ? prev + ' ' + newEntry.input_text : newEntry.input_text);
+      setRawEntries(prev => [newEntry, ...prev]);
       setEntryCount(prev => prev + 1);
       setLastUpdate(new Date());
     });
 
-    return () => {
-      unsubscribe();
-    };
+    return () => unsubscribe();
   }, []);
 
   // Debounced Cloud Generation
@@ -205,52 +288,83 @@ const LiveDisplayPage: React.FC = () => {
       } finally {
         setLoading(false);
       }
-    }, 500);
+    }, 800); // Increased debounce slightly for better performance with large text
 
     return () => clearTimeout(timer);
   }, [allText]);
 
+  const marqueeText = rawEntries.map(e => e.input_text).join('  •  ');
+
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)] bg-gray-900 text-white overflow-hidden">
-      {/* Status Bar */}
-      <div className="bg-gray-800 px-6 py-3 flex justify-between items-center shadow-md z-10">
-        <div className="flex items-center space-x-4">
-            <div className="flex items-center">
-                <span className="relative flex h-3 w-3 mr-2">
-                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${isBackendConfigured ? 'bg-green-400' : 'bg-yellow-400'} opacity-75`}></span>
-                  <span className={`relative inline-flex rounded-full h-3 w-3 ${isBackendConfigured ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
+    <div className="flex flex-col h-screen bg-slate-50 overflow-hidden font-figtree">
+      {/* Navbar Spacer */}
+      <div className="h-[64px] flex-shrink-0"></div>
+
+      {/* Dashboard Header */}
+      <div className="bg-white px-8 py-4 flex justify-between items-center border-b border-gray-200 shadow-sm z-10 flex-shrink-0">
+        <div className="flex items-center space-x-8">
+            <div className="flex items-center px-4 py-2 bg-gray-50 rounded-lg border border-gray-100">
+                <span className="relative flex h-3 w-3 mr-3">
+                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${isBackendConfigured ? 'bg-[#007947]' : 'bg-yellow-400'} opacity-75`}></span>
+                  <span className={`relative inline-flex rounded-full h-3 w-3 ${isBackendConfigured ? 'bg-[#007947]' : 'bg-yellow-500'}`}></span>
                 </span>
-                <span className={`font-mono text-sm ${isBackendConfigured ? 'text-green-400' : 'text-yellow-400'}`}>
-                    {isBackendConfigured ? 'Google Sheets Connected' : 'Local Demo Mode'}
+                <span className={`font-bold text-sm tracking-wider ${isBackendConfigured ? 'text-[#007947]' : 'text-yellow-600'}`}>
+                    {isBackendConfigured ? 'LIVE SYSTEM ONLINE' : 'DEMO MODE ACTIVE'}
                 </span>
             </div>
-            <div className="h-4 w-px bg-gray-600"></div>
-            <span className="text-sm text-gray-400">Entries: <span className="text-white font-bold">{entryCount}</span></span>
+            <div className="hidden md:block h-8 w-px bg-gray-200"></div>
+            <div className="flex flex-col">
+              <span className="text-xs text-gray-400 uppercase tracking-widest font-bold">Total Responses</span>
+              <span className="text-[#F40000] text-2xl font-black font-kanit leading-none">{entryCount.toLocaleString()}</span>
+            </div>
         </div>
-        <div className="text-xs text-gray-500 font-mono">
-            Last Update: {lastUpdate.toLocaleTimeString()}
+        <div className="text-right hidden sm:block">
+            <div className="text-xs text-gray-400 uppercase tracking-widest font-bold mb-1">Last Updated</div>
+            <div className="font-mono text-sm font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded">
+              {lastUpdate.toLocaleTimeString('th-TH')}
+            </div>
         </div>
       </div>
 
       {/* Main Canvas Area */}
-      <div className="flex-1 relative flex items-center justify-center p-4 overflow-hidden">
+      <div className="flex-1 relative flex items-center justify-center p-4 md:p-10 overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-[0.03]" 
+             style={{backgroundImage: 'radial-gradient(#007947 1px, transparent 1px)', backgroundSize: '20px 20px'}}>
+        </div>
+
         {loading && !imageUrl ? (
-           <div className="flex flex-col items-center">
-             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500 mb-4"></div>
-             <p className="text-gray-400">Aggregating text from Sheets...</p>
+           <div className="flex flex-col items-center justify-center z-10 bg-white/80 p-8 rounded-3xl backdrop-blur-sm shadow-lg border border-gray-100">
+             <div className="relative w-20 h-20 mb-6">
+               <div className="absolute inset-0 border-4 border-gray-200 rounded-full"></div>
+               <div className="absolute inset-0 border-4 border-[#007947] rounded-full border-t-transparent animate-spin"></div>
+             </div>
+             <p className="text-[#007947] font-kanit text-xl animate-pulse font-medium">กำลังประมวลผลความคิดเห็น...</p>
            </div>
         ) : !imageUrl ? (
-            <div className="text-center text-gray-500">
-                <p className="text-xl">Waiting for input...</p>
-                <p className="text-sm mt-2">Go to the Input page to start the cloud.</p>
+            <div className="text-center text-gray-300 z-10">
+                <svg className="w-32 h-32 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                <p className="text-4xl font-kanit font-light">รอรับข้อความแรก</p>
+                <p className="text-lg mt-2 font-light">Waiting for incoming messages...</p>
             </div>
         ) : (
-            <img 
-                src={imageUrl} 
-                alt="Live Word Cloud" 
-                className="max-w-full max-h-full object-contain drop-shadow-2xl animate-fade-in transition-all duration-500"
-            />
+            <div className="relative w-full h-full max-w-7xl flex items-center justify-center p-4 animate-fade-in">
+              {/* Decorative Frame */}
+              <div className="absolute inset-0 border border-gray-200 bg-white rounded-3xl shadow-[0_0_40px_-10px_rgba(0,0,0,0.05)]"></div>
+              <div className="absolute top-4 left-4 right-4 bottom-4 border-2 border-dashed border-gray-100 rounded-2xl pointer-events-none"></div>
+              
+              <img 
+                  src={imageUrl} 
+                  alt="Live Word Cloud" 
+                  className="relative max-w-full max-h-full object-contain hover:scale-[1.01] transition-transform duration-[2s] z-10"
+              />
+            </div>
         )}
+      </div>
+      
+      {/* Running Text Marquee */}
+      <div className="flex-shrink-0">
+        <Marquee text={marqueeText} />
       </div>
     </div>
   );
@@ -269,14 +383,15 @@ const App: React.FC = () => {
 
     if (!window.location.hash) window.location.hash = '#/';
     window.addEventListener('hashchange', handleHashChange);
+    
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-inter">
+    <div className="min-h-screen bg-gray-50 flex flex-col font-figtree text-gray-800">
       <Navbar />
       
-      <main className="flex-1">
+      <main className="flex-1 flex flex-col">
         {(currentPath === '#/' || currentPath === '') && <InputPage />}
         {currentPath === '#/live' && <LiveDisplayPage />}
       </main>

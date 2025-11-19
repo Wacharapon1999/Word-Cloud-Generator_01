@@ -1,7 +1,7 @@
 export const CANVAS_CONFIG = {
-  width: 800,
-  height: 600,
-  fontFamily: 'Inter, sans-serif',
+  width: 1000, // Increased width for better resolution
+  height: 700,
+  fontFamily: 'Kanit, Figtree, sans-serif',
 };
 
 export const STOP_WORDS = new Set([
@@ -25,11 +25,10 @@ export const STOP_WORDS = new Set([
   'you', 'you\'d', 'you\'ll', 'you\'re', 'you\'ve', 'your', 'yours', 'yourself', 'yourselves'
 ]);
 
+// Theme Colors: Green #007947, Red #F40000
 export const COLORS = [
-  '#4F46E5', // Indigo 600
-  '#2563EB', // Blue 600
-  '#7C3AED', // Violet 600
-  '#DB2777', // Pink 600
-  '#059669', // Emerald 600
-  '#D97706', // Amber 600
+  '#007947', // Theme Green
+  '#F40000', // Theme Red
+  '#005F37', // Darker Green variation
+  '#D00000', // Darker Red variation
 ];
