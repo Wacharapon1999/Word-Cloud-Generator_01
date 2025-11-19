@@ -44,7 +44,7 @@ const processPhrases = (entries: string[]): WordFrequency[] => {
  */
 const intersect = (word: PlacedWord, otherWord: PlacedWord): boolean => {
   // Expand bounding box slightly (padding) for better visual separation
-  const padding = 8; // Increased padding for clearer separation of phrases
+  const padding = 10; 
   
   return !(word.x + word.width / 2 + padding < otherWord.x - otherWord.width / 2 - padding ||
            word.x - word.width / 2 - padding > otherWord.x + otherWord.width / 2 + padding ||
@@ -84,8 +84,8 @@ export const generateWordCloudBlob = (entries: string[]): Promise<Blob | null> =
     // Calculation config
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
-    const maxFontSize = 160; // Increased max font size
-    const minFontSize = 32;  // Increased min font size
+    const maxFontSize = 200; // Increased max font size for high frequency phrases
+    const minFontSize = 40;  // Increased min font size for readability
     
     const maxCount = words[0]?.count || 1;
     const minCount = words[words.length - 1]?.count || 1;
@@ -95,6 +95,7 @@ export const generateWordCloudBlob = (entries: string[]): Promise<Blob | null> =
     words.forEach((word) => {
       // Calculate font size based on frequency
       const scale = maxCount === minCount ? 1 : (word.count - minCount) / (maxCount - minCount);
+      // Linear interpolation
       word.size = Math.floor(minFontSize + scale * (maxFontSize - minFontSize));
       
       // Setup font to measure accurately
@@ -106,16 +107,17 @@ export const generateWordCloudBlob = (entries: string[]): Promise<Blob | null> =
       let width = metrics.width;
       
       // Safety: If a long sentence is wider than the canvas, scale it down
+      // Allow up to 90% of canvas width
       if (width > canvas.width * 0.9) {
           const scaleFactor = (canvas.width * 0.9) / width;
           word.size = Math.floor(word.size * scaleFactor);
-          // Re-measure
+          // Re-measure with new size
           ctx.font = `bold ${word.size}px ${CANVAS_CONFIG.fontFamily}`;
           metrics = ctx.measureText(word.text);
           width = metrics.width;
       }
 
-      const height = word.size * 1.0; // Slightly more height for line spacing
+      const height = word.size * 1.1; // Slightly more height for line spacing
 
       const candidate: PlacedWord = {
         ...word,
@@ -129,9 +131,9 @@ export const generateWordCloudBlob = (entries: string[]): Promise<Blob | null> =
       let angle = 0;
       let radius = 0;
       const angleStep = 0.5;
-      const radiusStep = 10; // Increased step for larger items
+      const radiusStep = 12; 
       
-      const maxIterations = 2000;
+      const maxIterations = 2500;
       let iterations = 0;
 
       while (iterations < maxIterations) {
@@ -144,10 +146,14 @@ export const generateWordCloudBlob = (entries: string[]): Promise<Blob | null> =
         // 1. Boundary Check
         if (candidate.x - width/2 < 0 || candidate.x + width/2 > canvas.width || 
             candidate.y - height/2 < 0 || candidate.y + height/2 > canvas.height) {
+             // If spiraled out of canvas bounds
              if (radius > Math.max(canvas.width, canvas.height)) {
                 collision = true;
                 break;
              }
+             // Allow placement near edges, but strictly check bounds if needed. 
+             // For word cloud, usually we just check overlap. 
+             // Let's strictly enforce bounds so it doesn't get cut off.
              collision = true;
         }
 

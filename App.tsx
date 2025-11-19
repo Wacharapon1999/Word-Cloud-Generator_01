@@ -35,10 +35,12 @@ const Navbar: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-12">
           <div className="flex items-center group cursor-pointer" onClick={() => window.location.hash = '#/'}>
-            <span className="text-2xl mr-2 transform group-hover:scale-110 transition-transform duration-300">☁️</span>
+            <div className="mr-3 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-[#007947] text-xl transform group-hover:scale-110 transition-transform">
+              ☁️
+            </div>
             <span className={`text-2xl font-black tracking-tight font-kanit transition-colors ${scrolled || isLive ? 'text-[#007947]' : 'text-white'}`}>
               CG&Risk Day
-              <span className={`ml-1 px-1.5 py-0.5 rounded text-sm align-middle ${scrolled || isLive ? 'bg-[#F40000] text-white' : 'bg-white text-[#F40000]'}`}>Word Cloud</span>
+              <span className={`ml-2 px-2 py-0.5 rounded-md text-sm align-middle font-bold ${scrolled || isLive ? 'bg-[#F40000] text-white' : 'bg-white text-[#F40000]'}`}>Word Cloud</span>
             </span>
           </div>
           <div className="flex items-center space-x-2 bg-gray-100/10 rounded-full p-1 backdrop-blur-sm">
@@ -121,10 +123,12 @@ const InputPage: React.FC = () => {
           )}
         </div>
 
-        <div className="bg-white/80 backdrop-blur-xl p-1 rounded-[2rem] shadow-[0_20px_50px_-12px_rgba(0,121,71,0.15)] border border-white/50">
-          <div className="bg-white rounded-[1.8rem] p-6 sm:p-10 border border-gray-50">
+        <div className="bg-white/60 backdrop-blur-2xl p-1 rounded-[2.5rem] shadow-[0_20px_50px_-12px_rgba(0,121,71,0.15)] border border-white">
+          <div className="bg-gradient-to-b from-white to-slate-50 rounded-[2.3rem] p-6 sm:p-10 border border-gray-100">
             <label htmlFor="input-text" className="block text-lg font-bold text-gray-700 mb-3 font-kanit flex items-center">
-              <span className="bg-[#007947] text-white w-8 h-8 rounded-lg flex items-center justify-center mr-3 text-sm">1</span>
+              <div className="bg-gradient-to-br from-[#007947] to-[#005f37] text-white w-10 h-10 rounded-xl flex items-center justify-center mr-3 text-lg shadow-md">
+                ✍️
+              </div>
               ข้อความของคุณ (Your Message)
             </label>
             
@@ -139,8 +143,8 @@ const InputPage: React.FC = () => {
                       handleSubmit();
                    }
                 }}
-                rows={4}
-                className="w-full px-6 py-5 rounded-2xl border-2 border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-4 focus:ring-[#007947]/10 focus:border-[#007947] outline-none resize-none text-xl text-gray-700 placeholder-gray-300 transition-all duration-300 font-kanit leading-relaxed"
+                rows={3}
+                className="w-full px-6 py-5 rounded-2xl border-2 border-gray-200 bg-white focus:bg-white focus:ring-4 focus:ring-[#007947]/10 focus:border-[#007947] outline-none resize-none text-2xl text-gray-700 placeholder-gray-300 transition-all duration-300 font-kanit leading-relaxed shadow-inner"
                 placeholder="พิมพ์สิ่งที่คิดอยู่ที่นี่..."
               />
               <div className="absolute bottom-4 right-4 text-xs text-gray-400 font-medium pointer-events-none bg-white/80 px-2 py-1 rounded-md backdrop-blur">
@@ -151,14 +155,14 @@ const InputPage: React.FC = () => {
             <div className="mt-8 flex items-center justify-between">
               <div className="text-sm min-h-[24px]">
                 {status === 'success' && (
-                  <span className="text-[#007947] flex items-center font-bold animate-fade-in bg-green-50 px-4 py-2 rounded-lg">
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"/></svg>
+                  <span className="text-[#007947] flex items-center font-bold animate-fade-in bg-green-50 px-4 py-2 rounded-xl border border-green-100">
+                    <div className="w-5 h-5 mr-2 bg-[#007947] rounded-full flex items-center justify-center text-white text-xs">✓</div>
                     ส่งข้อมูลเรียบร้อยแล้ว!
                   </span>
                 )}
                 {status === 'error' && (
-                  <span className="text-[#F40000] flex items-center font-bold animate-fade-in bg-red-50 px-4 py-2 rounded-lg">
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                  <span className="text-[#F40000] flex items-center font-bold animate-fade-in bg-red-50 px-4 py-2 rounded-xl border border-red-100">
+                    <div className="w-5 h-5 mr-2 bg-[#F40000] rounded-full flex items-center justify-center text-white text-xs">!</div>
                     เกิดข้อผิดพลาด โปรดลองใหม่
                   </span>
                 )}
@@ -170,7 +174,7 @@ const InputPage: React.FC = () => {
                 className={`group relative px-10 py-4 rounded-xl font-bold text-white text-lg shadow-lg transition-all duration-300 font-kanit overflow-hidden ${
                   isSubmitting || !inputText.trim()
                     ? 'bg-gray-300 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-[#007947] to-[#005f37] hover:shadow-[#007947]/40 hover:-translate-y-1 hover:shadow-xl'
+                    : 'bg-gradient-to-r from-[#007947] to-[#005f37] hover:shadow-[#007947]/40 hover:-translate-y-1 hover:shadow-xl active:translate-y-0'
                 }`}
               >
                 <span className="relative z-10 flex items-center">
@@ -198,40 +202,11 @@ const InputPage: React.FC = () => {
   );
 };
 
-const Marquee: React.FC<{ text: string }> = ({ text }) => {
-  if (!text) return null;
-  
-  // Ensure enough content for smooth loop
-  const displayContent = text.length < 1000 ? Array(20).fill(text).join('  •  ') : text;
-
-  return (
-    <div className="w-full bg-[#1a1a1a] border-t-4 border-[#F40000] shadow-2xl relative z-20">
-      <div className="max-w-full mx-auto py-4 overflow-hidden relative">
-        <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-[#1a1a1a] to-transparent z-10"></div>
-        <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-[#1a1a1a] to-transparent z-10"></div>
-        
-        <div className="marquee-container">
-          <div className="marquee-content">
-            <span className="text-3xl font-kanit font-medium tracking-wide text-white/90 px-4 leading-tight">
-              {displayContent}
-            </span>
-            {/* Duplicate for seamless loop */}
-            <span className="text-3xl font-kanit font-medium tracking-wide text-white/90 px-4 leading-tight">
-              {displayContent}
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const LiveDisplayPage: React.FC = () => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [entries, setEntries] = useState<string[]>([]); // Store array of strings instead of one joined string
-  const [rawEntries, setRawEntries] = useState<WordCloudEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [entries, setEntries] = useState<string[]>([]); // Store array of strings
   const [entryCount, setEntryCount] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
   // Load initial data
@@ -242,7 +217,6 @@ const LiveDisplayPage: React.FC = () => {
         if (fetchedEntries.length > 0) {
             const textArray = fetchedEntries.map(e => e.input_text);
             setEntries(textArray);
-            setRawEntries(fetchedEntries);
             setEntryCount(fetchedEntries.length);
         }
       } catch (e) {
@@ -259,7 +233,6 @@ const LiveDisplayPage: React.FC = () => {
   useEffect(() => {
     const unsubscribe = subscribeToNewEntries((newEntry: WordCloudEntry) => {
       setEntries(prev => [newEntry.input_text, ...prev]); // Add new entry to start of array
-      setRawEntries(prev => [newEntry, ...prev]);
       setEntryCount(prev => prev + 1);
       setLastUpdate(new Date());
     });
@@ -277,7 +250,7 @@ const LiveDisplayPage: React.FC = () => {
     setLoading(true);
     const timer = setTimeout(async () => {
       try {
-        // Pass the array of strings (phrases) directly to the generator
+        // Pass raw array to generator to preserve phrases
         const blob = await generateWordCloudBlob(entries);
         if (blob) {
           const url = URL.createObjectURL(blob);
@@ -291,9 +264,7 @@ const LiveDisplayPage: React.FC = () => {
     }, 800);
 
     return () => clearTimeout(timer);
-  }, [entries]); // Dependency changed from allText to entries array
-
-  const marqueeText = rawEntries.map(e => e.input_text).join('  •  ');
+  }, [entries]);
 
   return (
     <div className="flex flex-col h-screen bg-slate-50 overflow-hidden font-figtree">
@@ -301,7 +272,7 @@ const LiveDisplayPage: React.FC = () => {
       <div className="h-[64px] flex-shrink-0"></div>
 
       {/* Dashboard Header */}
-      <div className="bg-white px-8 py-4 flex justify-between items-center border-b border-gray-200 shadow-sm z-10 flex-shrink-0">
+      <div className="bg-white px-8 py-4 flex justify-between items-center border-b border-gray-200 shadow-sm z-10 flex-shrink-0 relative">
         <div className="flex items-center space-x-8">
             <div className="flex items-center px-4 py-2 bg-gray-50 rounded-lg border border-gray-100">
                 <span className="relative flex h-3 w-3 mr-3">
@@ -327,19 +298,19 @@ const LiveDisplayPage: React.FC = () => {
       </div>
 
       {/* Main Canvas Area */}
-      <div className="flex-1 relative flex items-center justify-center p-4 md:p-10 overflow-hidden">
+      <div className="flex-1 relative flex items-center justify-center p-4 md:p-10 overflow-hidden bg-slate-50">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-[0.03]" 
              style={{backgroundImage: 'radial-gradient(#007947 1px, transparent 1px)', backgroundSize: '20px 20px'}}>
         </div>
 
         {loading && !imageUrl ? (
-           <div className="flex flex-col items-center justify-center z-10 bg-white/80 p-8 rounded-3xl backdrop-blur-sm shadow-lg border border-gray-100">
-             <div className="relative w-20 h-20 mb-6">
-               <div className="absolute inset-0 border-4 border-gray-200 rounded-full"></div>
-               <div className="absolute inset-0 border-4 border-[#007947] rounded-full border-t-transparent animate-spin"></div>
+           <div className="flex flex-col items-center justify-center z-10 bg-white/80 p-12 rounded-[2rem] backdrop-blur-md shadow-xl border border-gray-100">
+             <div className="relative w-24 h-24 mb-8">
+               <div className="absolute inset-0 border-8 border-gray-100 rounded-full"></div>
+               <div className="absolute inset-0 border-8 border-[#007947] rounded-full border-t-transparent animate-spin"></div>
              </div>
-             <p className="text-[#007947] font-kanit text-xl animate-pulse font-medium">กำลังประมวลผลความคิดเห็น...</p>
+             <p className="text-[#007947] font-kanit text-2xl animate-pulse font-bold">กำลังประมวลผลความคิดเห็น...</p>
            </div>
         ) : !imageUrl ? (
             <div className="text-center text-gray-300 z-10">
@@ -348,23 +319,24 @@ const LiveDisplayPage: React.FC = () => {
                 <p className="text-lg mt-2 font-light">Waiting for incoming messages...</p>
             </div>
         ) : (
-            <div className="relative w-full h-full max-w-7xl flex items-center justify-center p-4 animate-fade-in">
-              {/* Decorative Frame */}
-              <div className="absolute inset-0 border border-gray-200 bg-white rounded-3xl shadow-[0_0_40px_-10px_rgba(0,0,0,0.05)]"></div>
-              <div className="absolute top-4 left-4 right-4 bottom-4 border-2 border-dashed border-gray-100 rounded-2xl pointer-events-none"></div>
+            <div className="relative w-full h-full max-w-[90%] max-h-[90%] flex items-center justify-center p-6 animate-fade-in">
+              {/* Premium Frame */}
+              <div className="absolute inset-0 border border-white bg-white rounded-[2rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)]"></div>
+              <div className="absolute top-4 left-4 right-4 bottom-4 border border-dashed border-gray-200 rounded-[1.5rem] pointer-events-none"></div>
               
               <img 
                   src={imageUrl} 
                   alt="Live Word Cloud" 
-                  className="relative max-w-full max-h-full object-contain hover:scale-[1.01] transition-transform duration-[2s] z-10"
+                  className="relative max-w-full max-h-full object-contain z-10 drop-shadow-xl"
               />
             </div>
         )}
       </div>
       
-      {/* Running Text Marquee */}
-      <div className="flex-shrink-0">
-        <Marquee text={marqueeText} />
+      {/* Footer / Status Bar */}
+      <div className="bg-white border-t border-gray-200 py-2 px-8 text-xs text-gray-400 flex justify-between items-center">
+          <span>CG&Risk Day Word Cloud System</span>
+          <span>Powered by React & Google Sheets</span>
       </div>
     </div>
   );
