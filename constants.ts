@@ -1,10 +1,12 @@
 export const CANVAS_CONFIG = {
-  width: 1000, // Increased width for better resolution
-  height: 700,
+  width: 2500, // Greatly increased width to support full sentences/phrases on one line
+  height: 1500,
   fontFamily: 'Kanit, Figtree, sans-serif',
 };
 
 export const STOP_WORDS = new Set([
+  // Stop words might be less relevant when using phrase mode, but keeping them just in case
+  // logic changes back or for partial cleaning if needed.
   'a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'an', 'and', 'any', 'are', 'aren\'t', 'as', 'at',
   'be', 'because', 'been', 'before', 'being', 'below', 'between', 'both', 'but', 'by',
   'can', 'cannot', 'could', 'couldn\'t',

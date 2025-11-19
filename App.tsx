@@ -37,8 +37,8 @@ const Navbar: React.FC = () => {
           <div className="flex items-center group cursor-pointer" onClick={() => window.location.hash = '#/'}>
             <span className="text-2xl mr-2 transform group-hover:scale-110 transition-transform duration-300">☁️</span>
             <span className={`text-2xl font-black tracking-tight font-kanit transition-colors ${scrolled || isLive ? 'text-[#007947]' : 'text-white'}`}>
-              WordCloud
-              <span className={`ml-1 px-1.5 py-0.5 rounded text-sm align-middle ${scrolled || isLive ? 'bg-[#F40000] text-white' : 'bg-white text-[#F40000]'}`}>TH</span>
+              CG&Risk Day
+              <span className={`ml-1 px-1.5 py-0.5 rounded text-sm align-middle ${scrolled || isLive ? 'bg-[#F40000] text-white' : 'bg-white text-[#F40000]'}`}>Word Cloud</span>
             </span>
           </div>
           <div className="flex items-center space-x-2 bg-gray-100/10 rounded-full p-1 backdrop-blur-sm">
@@ -215,8 +215,7 @@ const Marquee: React.FC<{ text: string }> = ({ text }) => {
             <span className="text-3xl font-kanit font-medium tracking-wide text-white/90 px-4 leading-tight">
               {displayContent}
             </span>
-            {/* Duplicate for seamless loop if using CSS transform trick, 
-                but here relying on long content and reset */}
+            {/* Duplicate for seamless loop */}
             <span className="text-3xl font-kanit font-medium tracking-wide text-white/90 px-4 leading-tight">
               {displayContent}
             </span>
@@ -229,7 +228,7 @@ const Marquee: React.FC<{ text: string }> = ({ text }) => {
 
 const LiveDisplayPage: React.FC = () => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [allText, setAllText] = useState<string>('');
+  const [entries, setEntries] = useState<string[]>([]); // Store array of strings instead of one joined string
   const [rawEntries, setRawEntries] = useState<WordCloudEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [entryCount, setEntryCount] = useState(0);
@@ -239,12 +238,12 @@ const LiveDisplayPage: React.FC = () => {
   useEffect(() => {
     const loadInitialData = async () => {
       try {
-        const entries = await fetchAllTexts();
-        if (entries.length > 0) {
-            const combinedText = entries.map(e => e.input_text).join(' ');
-            setAllText(combinedText);
-            setRawEntries(entries);
-            setEntryCount(entries.length);
+        const fetchedEntries = await fetchAllTexts();
+        if (fetchedEntries.length > 0) {
+            const textArray = fetchedEntries.map(e => e.input_text);
+            setEntries(textArray);
+            setRawEntries(fetchedEntries);
+            setEntryCount(fetchedEntries.length);
         }
       } catch (e) {
         console.error("Failed to load initial data", e);
@@ -259,7 +258,7 @@ const LiveDisplayPage: React.FC = () => {
   // Subscribe to real-time updates
   useEffect(() => {
     const unsubscribe = subscribeToNewEntries((newEntry: WordCloudEntry) => {
-      setAllText(prev => prev ? prev + ' ' + newEntry.input_text : newEntry.input_text);
+      setEntries(prev => [newEntry.input_text, ...prev]); // Add new entry to start of array
       setRawEntries(prev => [newEntry, ...prev]);
       setEntryCount(prev => prev + 1);
       setLastUpdate(new Date());
@@ -270,7 +269,7 @@ const LiveDisplayPage: React.FC = () => {
 
   // Debounced Cloud Generation
   useEffect(() => {
-    if (!allText.trim()) {
+    if (entries.length === 0) {
         setImageUrl(null);
         return;
     }
@@ -278,7 +277,8 @@ const LiveDisplayPage: React.FC = () => {
     setLoading(true);
     const timer = setTimeout(async () => {
       try {
-        const blob = await generateWordCloudBlob(allText);
+        // Pass the array of strings (phrases) directly to the generator
+        const blob = await generateWordCloudBlob(entries);
         if (blob) {
           const url = URL.createObjectURL(blob);
           setImageUrl(url);
@@ -288,10 +288,10 @@ const LiveDisplayPage: React.FC = () => {
       } finally {
         setLoading(false);
       }
-    }, 800); // Increased debounce slightly for better performance with large text
+    }, 800);
 
     return () => clearTimeout(timer);
-  }, [allText]);
+  }, [entries]); // Dependency changed from allText to entries array
 
   const marqueeText = rawEntries.map(e => e.input_text).join('  •  ');
 

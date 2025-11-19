@@ -1,4 +1,4 @@
-import { CANVAS_CONFIG, STOP_WORDS, COLORS } from '../constants';
+import { CANVAS_CONFIG, COLORS } from '../constants';
 import { WordFrequency } from '../types';
 
 // Internal interface for collision detection with dimensions
@@ -10,46 +10,20 @@ interface PlacedWord extends WordFrequency {
 }
 
 /**
- * Tokenizes text, removes stop words, and counts frequency.
- * Supports international text segmentation (like Thai) if browser supports Intl.Segmenter.
+ * Processes input entries as whole phrases.
+ * Does not split by space. Trims whitespace and counts exact phrase matches.
  */
-const processText = (text: string): WordFrequency[] => {
-  let words: string[] = [];
-
-  // Use Intl.Segmenter if available for better word splitting (especially for Thai/no-space languages)
-  // @ts-ignore - Intl.Segmenter is available in most modern browsers
-  if (typeof Intl !== 'undefined' && Intl.Segmenter) {
-    try {
-      // @ts-ignore
-      const segmenter = new Intl.Segmenter('th', { granularity: 'word' });
-      // @ts-ignore
-      const segments = segmenter.segment(text.toLowerCase());
-      for (const { segment, isWordLike } of segments) {
-        if (isWordLike) {
-          words.push(segment);
-        }
-      }
-    } catch (err) {
-      console.warn("Intl.Segmenter failed, falling back to regex split", err);
-      // Fallback regex that supports unicode letters/numbers
-      const cleanText = text.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, '');
-      words = cleanText.split(/\s+/);
-    }
-  } else {
-    // Fallback for browsers without Intl.Segmenter or older environments
-    // \p{L} matches any unicode letter, \p{N} matches any number
-    const cleanText = text.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, '');
-    words = cleanText.split(/\s+/);
-  }
-  
+const processPhrases = (entries: string[]): WordFrequency[] => {
   const frequencyMap: Record<string, number> = {};
   let maxCount = 0;
 
-  words.forEach(word => {
-    // Basic filtering: length > 1 and not in English stop words list
-    if (word.length > 1 && !STOP_WORDS.has(word)) {
-      frequencyMap[word] = (frequencyMap[word] || 0) + 1;
-      maxCount = Math.max(maxCount, frequencyMap[word]);
+  entries.forEach(entry => {
+    const cleanEntry = entry.trim(); 
+    // Only count if not empty. 
+    // We treat the entire line as one token (phrase mode).
+    if (cleanEntry.length > 0) {
+      frequencyMap[cleanEntry] = (frequencyMap[cleanEntry] || 0) + 1;
+      maxCount = Math.max(maxCount, frequencyMap[cleanEntry]);
     }
   });
 
@@ -62,7 +36,7 @@ const processText = (text: string): WordFrequency[] => {
       color: COLORS[Math.floor(Math.random() * COLORS.length)]
     }))
     .sort((a, b) => b.count - a.count)
-    .slice(0, 100); // Limit to top 100 words
+    .slice(0, 150); // Limit words to keep performance decent
 };
 
 /**
@@ -70,7 +44,7 @@ const processText = (text: string): WordFrequency[] => {
  */
 const intersect = (word: PlacedWord, otherWord: PlacedWord): boolean => {
   // Expand bounding box slightly (padding) for better visual separation
-  const padding = 4;
+  const padding = 8; // Increased padding for clearer separation of phrases
   
   return !(word.x + word.width / 2 + padding < otherWord.x - otherWord.width / 2 - padding ||
            word.x - word.width / 2 - padding > otherWord.x + otherWord.width / 2 + padding ||
@@ -80,14 +54,15 @@ const intersect = (word: PlacedWord, otherWord: PlacedWord): boolean => {
 
 /**
  * Generates the Word Cloud on a canvas and returns a Blob.
+ * Accepts an array of raw text entries (phrases).
  */
-export const generateWordCloudBlob = (text: string): Promise<Blob | null> => {
+export const generateWordCloudBlob = (entries: string[]): Promise<Blob | null> => {
   return new Promise((resolve) => {
-    const words = processText(text);
+    const words = processPhrases(entries);
     
-    // If no words found (e.g. only stop words or symbols), return null
+    // If no words found
     if (words.length === 0) {
-      console.warn("No valid words found to generate cloud");
+      console.warn("No valid phrases found to generate cloud");
       resolve(null);
       return;
     }
@@ -109,8 +84,8 @@ export const generateWordCloudBlob = (text: string): Promise<Blob | null> => {
     // Calculation config
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
-    const maxFontSize = 100;
-    const minFontSize = 16;
+    const maxFontSize = 160; // Increased max font size
+    const minFontSize = 32;  // Increased min font size
     
     const maxCount = words[0]?.count || 1;
     const minCount = words[words.length - 1]?.count || 1;
@@ -127,10 +102,20 @@ export const generateWordCloudBlob = (text: string): Promise<Blob | null> => {
       ctx.textBaseline = 'middle';
       ctx.textAlign = 'center';
       
-      const metrics = ctx.measureText(word.text);
-      const width = metrics.width;
-      // Height approximation usually works well for simple layouts
-      const height = word.size * 0.85; 
+      let metrics = ctx.measureText(word.text);
+      let width = metrics.width;
+      
+      // Safety: If a long sentence is wider than the canvas, scale it down
+      if (width > canvas.width * 0.9) {
+          const scaleFactor = (canvas.width * 0.9) / width;
+          word.size = Math.floor(word.size * scaleFactor);
+          // Re-measure
+          ctx.font = `bold ${word.size}px ${CANVAS_CONFIG.fontFamily}`;
+          metrics = ctx.measureText(word.text);
+          width = metrics.width;
+      }
+
+      const height = word.size * 1.0; // Slightly more height for line spacing
 
       const candidate: PlacedWord = {
         ...word,
@@ -144,10 +129,9 @@ export const generateWordCloudBlob = (text: string): Promise<Blob | null> => {
       let angle = 0;
       let radius = 0;
       const angleStep = 0.5;
-      const radiusStep = 6;
+      const radiusStep = 10; // Increased step for larger items
       
-      // Max iterations to prevent infinite loops
-      const maxIterations = 1500;
+      const maxIterations = 2000;
       let iterations = 0;
 
       while (iterations < maxIterations) {
@@ -157,16 +141,13 @@ export const generateWordCloudBlob = (text: string): Promise<Blob | null> => {
         // Check collision
         let collision = false;
         
-        // 1. Boundary Check (center point + half dimension)
+        // 1. Boundary Check
         if (candidate.x - width/2 < 0 || candidate.x + width/2 > canvas.width || 
             candidate.y - height/2 < 0 || candidate.y + height/2 > canvas.height) {
-             // If we go out of bounds, we continue spiraling hoping to find a gap,
-             // but if radius is too large, we break.
              if (radius > Math.max(canvas.width, canvas.height)) {
-                collision = true; // Stop trying
+                collision = true;
                 break;
              }
-             // Treat out of bounds as collision to skip drawing here
              collision = true;
         }
 
@@ -181,10 +162,7 @@ export const generateWordCloudBlob = (text: string): Promise<Blob | null> => {
         }
 
         if (!collision) {
-          // Found a spot!
           placedWords.push({ ...candidate });
-          
-          // Draw immediately
           ctx.fillStyle = word.color;
           ctx.fillText(word.text, candidate.x, candidate.y);
           break;
@@ -196,7 +174,6 @@ export const generateWordCloudBlob = (text: string): Promise<Blob | null> => {
       }
     });
 
-    // Convert to Blob
     canvas.toBlob((blob) => {
       resolve(blob);
     }, 'image/png');
