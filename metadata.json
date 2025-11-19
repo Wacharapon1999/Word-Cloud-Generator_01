@@ -1,5 +1,5 @@
 {
-  "name": "Word Cloud Generator",
+  "name": "CG&Risk Day Word Cloud",
   "description": "A full-stack capable React application to generate word cloud images from text, using Google Sheets as the backend database.",
   "requestFramePermissions": []
 }

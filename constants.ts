@@ -1,6 +1,6 @@
 export const CANVAS_CONFIG = {
-  width: 2500, // Greatly increased width to support full sentences/phrases on one line
-  height: 1500,
+  width: 3200, // Increased for 4K/Large screen crispness
+  height: 1800, // Adjusted to 16:9 aspect ratio
   fontFamily: 'Kanit, Figtree, sans-serif',
 };
 
