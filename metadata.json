@@ -1,0 +1,5 @@
+{
+  "name": "Word Cloud Generator",
+  "description": "A full-stack capable React application to generate word cloud images from text, using Google Sheets as the backend database.",
+  "requestFramePermissions": []
+}
